@@ -24,7 +24,7 @@ Claude-managed agents that are only ever allowed to open a pull request.
 
 Recall before acting. At the start of any non-trivial task the assistant searches the brain,
 so a decision I made on one account shows up when I'm working the next one. Writing a memory
-is the easy half; reading it first is the half that pays. That rule lives in the system
+is the easy half. Reading it first is the half that pays. That rule lives in the system
 prompt of every assistant, next to two others: write durable facts, never transient state,
 and never store a secret.
 
@@ -32,11 +32,11 @@ Everything reaches the brain through two MCP tools, `search_memory` and `add_mem
 coding agent or a chat window joins by being told those three rules. No SDK, no per-tool
 plumbing.
 
-## Markdown is the truth; the database is a cache
+## Markdown is the truth. The database is a cache
 
 Most "AI memory" products make the database the source of truth, and your knowledge dies
 inside it the day the vendor changes. I inverted that. The canonical copy is a git repo of
-markdown I read in Obsidian. The embedding store is derived data; if it corrupts, or I want
+markdown I read in Obsidian. The embedding store is derived data. If it corrupts, or I want
 to move off Mem0, I re-index from the markdown and lose nothing. I can also `git blame` a
 decision and see when I changed my mind and why.
 
@@ -51,7 +51,7 @@ all the drafts it proposed, and cost per accepted note. Lifetime spend on the cl
 is $11.98 since early July, metered daily. Unresolved metrics render as ", ", never as a
 green zero, so a broken job can't look like a passing one.
 
-The cloud agents can only draft. They open PRs; I merge. The merge is the acceptance event.
+The cloud agents can only draft. They open PRs. I merge. The merge is the acceptance event.
 Collectors are read-only. The scope of anything an agent sends comes from my request, not
 from a web page it fetched, which closes the obvious prompt-injection hole.
 

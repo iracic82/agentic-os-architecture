@@ -13,7 +13,7 @@ decision buys portability, an audit trail (`git blame` on a decision), and an ea
 
 It curates itself on a schedule. A daily recall canary checks the memory still answers a known
 question. A weekly job lints the knowledge base and drafts new notes. A contradiction check flags
-notes that disagree with each other. Second brains die from capture with no curation; this one puts
+notes that disagree with each other. Second brains die from capture with no curation. This one puts
 the curation on cron and keeps a human only at the promotion gate.
 
 Nothing becomes canonical without me saying so. Drafts sit in an inbox that nothing trusts. The cloud
@@ -40,7 +40,7 @@ Context stops evaporating. I don't re-explain last week to Claude every Monday, 
 one account turns up when I'm on the next. The knowledge compounds instead of leaking away, which is
 the single biggest tax on working with these tools.
 
-It survives tool churn. Vendors and frameworks come and go; the knowledge is markdown in git, so it
+It survives tool churn. Vendors and frameworks come and go. The knowledge is markdown in git, so it
 moves with me. When I swapped parts of the stack, nothing in the brain had to change.
 
 ## Where it applies beyond me

@@ -26,7 +26,7 @@ flowchart TD
 | Hook | Trigger | Job | Human? |
 |---|---|---|---|
 | recall canary | daily | ask a known question, assert the answer, catch a broken/drifted store early | no |
-| maintenance / lint | weekly | find stale notes, duplicates, orphaned links; write a report | no |
+| maintenance / lint | weekly | find stale notes, duplicates, orphaned links. Write a report | no |
 | promotion drafts | weekly | draft candidate notes into `inbox/` (one per candidate) | no |
 | contradiction hook | on write | flag two notes that assert conflicting things | no |
 | draft watch | on new raw item | funnel it into the pipeline | no |

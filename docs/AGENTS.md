@@ -32,7 +32,7 @@ the research agent in project B. That cross-pollination is the whole point.
 The assistants above reach their own tools over MCP. Agent-to-agent discovery is a separate problem,
 and this ecosystem solves it with DNS-AID rather than a central registry or hardcoded URLs. An agent's
 endpoint and capabilities are published as SVCB records (RFC 9460) in DNS and validated with DNSSEC and
-DANE. I wrote the reference implementation from scratch; DNS-AID is a Linux Foundation project (accepted
+DANE. I wrote the reference implementation from scratch. DNS-AID is a Linux Foundation project (accepted
 27 May 2026, founding coalition Cloudflare, GoDaddy, Equinix, ISC, Infoblox) and an IETF dnsop draft,
 draft-mozleywilliams-dnsop-dnsaid. See https://github.com/iracic82/DNS-AID.
 

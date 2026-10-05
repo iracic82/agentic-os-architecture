@@ -12,7 +12,7 @@ projection of it.
 
 **Recall spine.** Mem0 extracts short facts from what I tell it and stores the vectors in a Postgres
 pgvector database on a Timescale instance. Every project reaches it through one MCP server,
-`brain-memory`, with two tools. The store is disposable; it is re-indexed from the markdown.
+`brain-memory`, with two tools. The store is disposable. It is re-indexed from the markdown.
 
 **Structure.** A graph compiler turns `~/brain` into a queryable knowledge graph, so the system can
 follow relationships between notes instead of only matching text.
@@ -64,7 +64,7 @@ fails if any break: no dangling `[[wikilinks]]`, no orphan notes, every `raw/` s
 ## Reversible by design
 
 Because the markdown is canonical, the expensive parts are swappable with nothing lost. The embedder
-started as a local MiniLM at 384 dimensions and moved to OpenAI `text-embedding-3-large` at 3072; re-
+started as a local MiniLM at 384 dimensions and moved to OpenAI `text-embedding-3-large` at 3072. Re-
 embedding was lossless, and the canary confirmed recall quality after the swap. The extraction model is
 switchable per machine (a hosted model by default, a local Qwen3-32B on the Puget box as a standby). If
 a vendor changes terms tomorrow, I re-index and carry on.

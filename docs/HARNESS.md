@@ -27,8 +27,8 @@ evaluator, and the acceptance metric measures it.
 ## The rules it follows
 
 - Tune the harness before swapping the model. The model is the tiebreaker.
-- Pair a generator with an independent evaluator; it cannot grade its own work.
-- Externalize state to files; treat context as scarce.
+- Pair a generator with an independent evaluator. It cannot grade its own work.
+- Externalize state to files. Treat context as scarce.
 - Give every agent an execution contract: a budget, a completion condition, an output path.
 - Measure cost per success and prune scaffolding. Leaner harnesses often beat heavier ones.
 
