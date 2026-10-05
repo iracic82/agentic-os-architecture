@@ -1,4 +1,4 @@
-# Hooks & automation — what runs without you
+# Hooks & automation, what runs without you
 
 The brain curates itself because a set of scheduled and event-driven hooks do the tedious work. A
 human is in the loop at exactly one point: promotion.
@@ -26,7 +26,7 @@ flowchart TD
 
 | Hook | Trigger | Job | Human? |
 |---|---|---|---|
-| recall canary | daily | ask a known question, assert the answer — catch a broken/drifted store early | no |
+| recall canary | daily | ask a known question, assert the answer, catch a broken/drifted store early | no |
 | maintenance / lint | weekly | find stale notes, duplicates, orphaned links; write a report | no |
 | promotion drafts | weekly | draft candidate notes into `inbox/` (one per candidate) | no |
 | contradiction hook | on write | flag two notes that assert conflicting things | no |
@@ -35,6 +35,6 @@ flowchart TD
 | memory backup | periodic | snapshot the vector store (markdown is already in git) | no |
 | **promote the inbox** | on human say-so | verify each draft, merge/move, fix `[[links]]`, update index, health-check, sync | **yes** |
 
-Scheduling runs on whatever the host provides — `cron`, macOS `launchd`, or Linux `systemd` — so the
+Scheduling runs on whatever the host provides, `cron`, macOS `launchd`, or Linux `systemd`, so the
 same brain maintains itself on a laptop or a server. See [templates/](../templates/) for skeletons of
 the daily and weekly jobs.

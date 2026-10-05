@@ -1,78 +1,119 @@
-# Cortex — a self-maintaining second brain for AI assistants
+# Agentic OS
 
-**A reference architecture (not the data).** This repo documents *how* I wired a persistent,
-cross-project memory and knowledge system into the way I work with AI assistants. It contains the
-design, the data flow, the cadence, and sanitized templates — **none of the private knowledge**. The
-point is the pattern, so anyone can rebuild their own.
+A memory that every AI assistant I use reads before it does anything, and that keeps
+itself in order while my laptop is shut.
 
-> The problem: an AI assistant that forgets everything between sessions is a very expensive goldfish.
-> Every Monday you re-explain your accounts, your decisions, and the gotchas you already hit. Cortex
-> is the fix — a brain the assistant **recalls from before it acts** and **maintains itself** while
-> you sleep.
+I got tired of re-explaining the same context to Claude every morning: last week's
+decision, the gotcha that cost me a day, which account wants which convention. So I built
+a brain that learns something once and hands it back at the start of the next session, in
+whatever project I'm in. The vector database is disposable. The actual knowledge is
+markdown in git, so nothing is trapped and I can read my own history with `git log`.
 
-## What it is, in one diagram
+This repo is the architecture. It is not the data. There are no memories here, no customer
+names, no credentials. If you want to build your own, the design is below and you can copy
+all of it.
 
-```mermaid
-flowchart LR
-  subgraph Capture
-    S[Any session / project] -->|add_memory| M[(Mem0 vector memory)]
-    S -->|dump| R[raw/]
-  end
-  subgraph Ingest["Jarvis pipeline"]
-    R --> C[classify] --> RT[route] --> ST[store] --> G[knowledge graph]
-  end
-  subgraph Canonical
-    IN[inbox/ drafts] -->|human approves| W[wiki/ markdown · source of truth]
-    W --> O[output/ deliverables]
-  end
-  G -.weekly funnel + lint.-> IN
-  M <-->|recall-first| S
-  W -->|rebuild| M
-  classDef store fill:#0e1627,stroke:#334155,color:#e2e8f0;
-  class M,R,W,O,IN store;
-```
+![Agentic OS architecture](assets/architecture-overview.png)
 
-## The five ideas worth stealing
+Three machines do the work. My MacBook holds the Obsidian vault and runs the daily jobs,
+but it sleeps, so anything that has to stay up lives on a Puget GPU box at home. The cloud
+part is deliberately small: a Mem0 pgvector store on a Timescale instance, and a handful of
+Claude-managed agents that are only ever allowed to open a pull request.
 
-1. **Recall-first.** Before starting any non-trivial task, the assistant searches the shared brain —
-   so a decision made on one account surfaces on the next. Memory is a *read* habit, not just a write.
-2. **Markdown is canonical; the vector DB is a cache.** The entire brain is rebuildable from
-   git-versioned markdown. The embedding store can be wiped and re-indexed at any time. Your knowledge
-   is never trapped in a database.
-3. **Human-approved promotion.** New knowledge lands in an `inbox/` as drafts. It only enters the
-   canonical wiki when a human says "promote" — which blocks drift, duplication, and memory poisoning.
-4. **It maintains itself.** A daily *recall canary* proves the memory still answers; a weekly pass
-   lints the knowledge base and drafts promotion candidates; a *contradiction hook* flags notes that
-   disagree; an *evolution proposer* suggests improvements to the brain's own design.
-5. **Cheap work runs locally.** Classification, routing, and summarization go to a local LLM; only the
-   hard reasoning spends a frontier model.
+## The one habit that makes it work
+
+Recall before acting. At the start of any non-trivial task the assistant searches the brain,
+so a decision I made on one account shows up when I'm working the next one. Writing a memory
+is the easy half; reading it first is the half that pays. That rule lives in the system
+prompt of every assistant, next to two others: write durable facts, never transient state,
+and never store a secret.
+
+Everything reaches the brain through two MCP tools, `search_memory` and `add_memory`. A new
+coding agent or a chat window joins by being told those three rules. No SDK, no per-tool
+plumbing.
+
+## Markdown is the truth; the database is a cache
+
+Most "AI memory" products make the database the source of truth, and your knowledge dies
+inside it the day the vendor changes. I inverted that. The canonical copy is a git repo of
+markdown I read in Obsidian. The embedding store is derived data; if it corrupts, or I want
+to move off Mem0, I re-index from the markdown and lose nothing. I can also `git blame` a
+decision and see when I changed my mind and why.
+
+## It measures whether it's actually working
+
+![The measurement loop](assets/measurement-loop.svg)
+
+This is the part I'm proudest of, and it's the part most second-brain setups skip. The
+system reports on itself. A dashboard on the Puget box (`:8899`) pulls the git repo every
+five minutes and tracks two numbers: acceptance, meaning notes I promoted and merged over
+all the drafts it proposed, and cost per accepted note. Lifetime spend on the cloud agents
+is $11.98 since early July, metered daily. Unresolved metrics render as "—", never as a
+green zero, so a broken job can't look like a passing one.
+
+The cloud agents can only draft. They open PRs; I merge. The merge is the acceptance event.
+Collectors are read-only. The scope of anything an agent sends comes from my request, not
+from a web page it fetched, which closes the obvious prompt-injection hole.
+
+## What I actually type at it
+
+![How knowledge flows](assets/knowledge-lifecycle.png)
+
+Most of it is automatic. The weekly job mines the week and drops draft notes into an inbox
+that nothing trusts yet. When I say "promote the inbox" it verifies each draft, merges it,
+fixes the `[[links]]`, updates the index, runs a health check, and syncs. "remember this"
+writes a short fact to memory. "ingest this url" pulls an article or a video transcript into
+staging. "lint the brain" finds contradictions, duplicates and thin notes. Reject a draft
+and it's deleted, but git keeps the history.
 
 ## How it's put together
 
-| Layer | Role | Public tooling it's built on |
+| Layer | What it does | Built on |
 |---|---|---|
-| Durable memory | cross-project recall/write via two tools (`search_memory`, `add_memory`) exposed to every assistant over MCP | a vector-memory service (e.g. Mem0) |
-| Knowledge base | long-form, git-versioned, human-readable source of truth | Markdown + Obsidian |
-| Ingestion ("Jarvis") | classify → route → store → graph a new fact | local LLM + a small graph store |
-| Cadence | daily canary, weekly maintenance, contradiction detection, evolution proposer, backup | cron / launchd / systemd |
-| Surfaces | a dashboard, a spoken daily brief, a heartbeat/graph publish | Streamlit, TTS |
+| Recall | cross-project read/write over two MCP tools | Mem0 pgvector on Timescale |
+| Canonical | long-form knowledge, one note per topic, git-versioned | Markdown + Obsidian |
+| Ingestion ("Jarvis") | classify, route, store, graph each new item | local Qwen3 via vLLM/Ollama |
+| Cadence | canary, weekly maintenance, contradiction check, backup | launchd on the Mac, cron on Puget |
+| Cloud agents | research, lint, ingest, promote, PR-only | Claude managed agents |
 
-See **[docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)** (components), **[docs/AGENTS.md](docs/AGENTS.md)** (how assistants + the ingestion agent connect), **[docs/HOOKS.md](docs/HOOKS.md)** (the automation), and **[docs/CADENCE.md](docs/CADENCE.md)**
-for the self-maintenance loop. **[templates/](templates/)** has sanitized skeletons of the cadence jobs.
+The models are split by cost. Classification, routing, the spoken morning brief and mem0
+extraction run on a local Qwen3-32B and cost nothing. Sonnet reconciles quality once a week.
 
-## Replicate it
+Longer detail: [architecture](docs/ARCHITECTURE.md), [how the agents connect](docs/AGENTS.md),
+[the hooks](docs/HOOKS.md), [the cadence](docs/CADENCE.md), [why it's built this way and how it
+compares](docs/WHY.md), and the [design decisions and threat model](docs/DESIGN-DECISIONS.md).
+Sanitised job skeletons are in [templates](templates/).
 
-1. Stand up a vector-memory service and expose `search_memory` / `add_memory` to your assistant (MCP).
-2. Make a git repo of markdown for the canonical knowledge; add an `inbox/` and a `_consolidation/` folder.
-3. Tell your assistant two rules: **recall before acting**, and **write durable facts, not transient state**.
-4. Add the cadence jobs (templates provided): a daily recall canary, a weekly lint + promotion draft.
-5. Keep the DB disposable — prove you can rebuild it from the markdown.
+## Finding other agents: DNS-AID
 
-## What this repo is NOT
+The assistants reach their own tools over MCP. Finding other agents is a different problem, and I
+didn't want hardcoded endpoints or a central registry owning the list. That job goes to DNS-AID. It
+publishes an agent's endpoint and capabilities as SVCB records (RFC 9460) in ordinary DNS, and
+validates them with DNSSEC and DANE, so discovery rides the naming system the internet already runs.
 
-It is **not** my actual brain. There are no memories, no account details, no customer data, and no
-private scripts here — only the architecture, so the idea can spread.
+I wrote the reference implementation from scratch. DNS-AID was accepted as a Linux Foundation project
+on 27 May 2026, with Cloudflare, GoDaddy, Equinix, ISC and Infoblox in the founding coalition, and
+it's an IETF dnsop draft (`draft-mozleywilliams-dnsop-dnsaid`). The implementation carries the
+publisher, a DNSSEC/DANE validator, an SDK, an MCP server, and a directory service. Code and spec:
+https://github.com/iracic82/DNS-AID
+
+## Build your own
+
+1. Stand up a vector-memory service and expose `search_memory` and `add_memory` to your
+   assistant over MCP.
+2. Make a git repo of markdown for the real knowledge. Add an `inbox/` for drafts and a
+   folder for weekly reports.
+3. Put three rules in every assistant's system prompt: recall before acting, write durable
+   facts not transient state, never store secrets.
+4. Add two scheduled jobs to start: a daily recall canary and a weekly lint that drafts
+   promotion candidates. Skeletons are in `templates/`.
+5. Keep the database disposable. Prove you can wipe it and rebuild from the markdown.
+
+## What this repo is not
+
+It is not my brain. No memories, no account detail, no customer content, no real scripts,
+just the design, so you can build yours.
 
 ## License
 
-MIT — see [LICENSE](LICENSE).
+MIT. See [LICENSE](LICENSE).
