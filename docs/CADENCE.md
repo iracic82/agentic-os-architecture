@@ -1,6 +1,6 @@
 # The self-maintenance loop
 
-Most "second brain" setups rot because capture is easy and curation is manual. Cortex pushes curation
+Most "second brain" setups rot because capture is easy and curation is manual. Agentic OS pushes curation
 onto a schedule, with a human only where judgment is required.
 
 | When | Job | What it does | Human? |

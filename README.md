@@ -13,7 +13,7 @@ This repo is the architecture. It is not the data. There are no memories here, n
 names, no credentials. If you want to build your own, the design is below and you can copy
 all of it.
 
-![Agentic OS architecture](assets/architecture-overview.png)
+![Where Agentic OS runs](assets/architecture-overview.svg)
 
 Three machines do the work. My MacBook holds the Obsidian vault and runs the daily jobs,
 but it sleeps, so anything that has to stay up lives on a Puget GPU box at home. The cloud
@@ -42,7 +42,7 @@ decision and see when I changed my mind and why.
 
 ## It measures whether it's actually working
 
-![The measurement loop](assets/measurement-loop.svg)
+![How it measures itself](assets/measured-loop.svg)
 
 This is the part I'm proudest of, and it's the part most second-brain setups skip. The
 system reports on itself. A dashboard on the Puget box (`:8899`) pulls the git repo every
@@ -57,7 +57,7 @@ from a web page it fetched, which closes the obvious prompt-injection hole.
 
 ## What I actually type at it
 
-![How knowledge flows](assets/knowledge-lifecycle.png)
+![How knowledge moves](assets/flow.svg)
 
 Most of it is automatic. The weekly job mines the week and drops draft notes into an inbox
 that nothing trusts yet. When I say "promote the inbox" it verifies each draft, merges it,

@@ -1,6 +1,6 @@
 # Architecture
 
-Cortex is four layers and one rule. The rule: **markdown is the source of truth; everything else is a
+Agentic OS is four layers and one rule. The rule: **markdown is the source of truth; everything else is a
 cache you can rebuild.**
 
 ## Components

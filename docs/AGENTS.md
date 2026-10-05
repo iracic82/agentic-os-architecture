@@ -1,6 +1,6 @@
 # Agents, how the thinking parts connect
 
-Cortex is not one agent. It is a **recall layer that every assistant shares**, plus a small internal
+Agentic OS is not one agent. It is a **recall layer that every assistant shares**, plus a small internal
 **ingestion agent** that curates what goes in. Keeping those two roles separate is the key design move.
 
 ## Two kinds of agent
