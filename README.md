@@ -48,7 +48,7 @@ This is the part I'm proudest of, and it's the part most second-brain setups ski
 system reports on itself. A dashboard on the Puget box (`:8899`) pulls the git repo every
 five minutes and tracks two numbers: acceptance, meaning notes I promoted and merged over
 all the drafts it proposed, and cost per accepted note. Lifetime spend on the cloud agents
-is $11.98 since early July, metered daily. Unresolved metrics render as "—", never as a
+is $11.98 since early July, metered daily. Unresolved metrics render as ", ", never as a
 green zero, so a broken job can't look like a passing one.
 
 The cloud agents can only draft. They open PRs; I merge. The merge is the acceptance event.

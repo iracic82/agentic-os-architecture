@@ -22,14 +22,11 @@ state and health, and a local model reads a spoken brief each morning.
 
 ```mermaid
 flowchart LR
-  subgraph Canonical["source of truth · git"]
-    RAW[raw/ staging] --> WIKI[wiki/ curated] --> OUT[output/ deliverables]
-  end
-  WIKI -->|re-index| MEM[(Mem0 · pgvector on Timescale)]
-  WIKI -->|compile| GRAPH[(knowledge graph)]
-  WIKI -->|open| OBS[Obsidian vault]
-  MEM <-->|search_memory / add_memory| MCP[["brain-memory MCP"]]
-  classDef s fill:#eef2ff,stroke:#c7d2fe,color:#1e293b; class MEM,GRAPH,MCP s;
+  RAW["raw/ staging"] --> WIKI["wiki/ curated"] --> OUT["output/ deliverables"]
+  WIKI -->|"re-index"| MEM["Mem0 pgvector on Timescale"]
+  WIKI -->|"compile"| GRAPH["knowledge graph"]
+  WIKI -->|"open"| OBS["Obsidian vault"]
+  MEM <-->|"search_memory / add_memory"| MCP["brain-memory MCP"]
 ```
 
 ## The scoping rule
@@ -45,14 +42,14 @@ instead of turning into a junk drawer.
 
 ```mermaid
 flowchart LR
-  IN[new item] --> CL[classify: fact / reference / deliverable / noise]
-  CL --> RO[route]
-  RO -->|short durable fact| MEM[(memory)]
-  RO -->|long-form| INBOX[wiki/inbox draft]
-  RO -->|deliverable| OUT[output/]
-  RO -->|noise| X[drop]
-  CL -.local Qwen3.-> LLM[cheap model]
-  RO -.local Qwen3.-> LLM
+  IN["new item"] --> CL["classify: fact, reference, deliverable, noise"]
+  CL --> RO["route"]
+  RO -->|"short durable fact"| MEM["memory"]
+  RO -->|"long-form"| INBOX["wiki/inbox draft"]
+  RO -->|"deliverable"| OUT["output/"]
+  RO -->|"noise"| X["drop"]
+  CL -.->|"local Qwen3"| LLM["cheap model"]
+  RO -.->|"local Qwen3"| LLM
 ```
 
 Classification and routing run on a local Qwen3. Only real synthesis, merging notes or writing a concept

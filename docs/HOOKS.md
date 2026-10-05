@@ -6,22 +6,21 @@ human is in the loop at exactly one point: promotion.
 ```mermaid
 flowchart TD
   subgraph Scheduled
-    DC[daily: recall canary] --> HL[(health log)]
-    WM[weekly: maintenance/lint] --> REP[_consolidation/ report]
-    WM --> DR[weekly: promotion drafts] --> INBOX[inbox/ draft notes]
-    BK[periodic: memory backup] --> SNAP[(snapshot)]
-    EP[periodic: evolution proposer] --> PROP[proposals about the brain itself]
+    DC["daily: recall canary"] --> HL["health log"]
+    WM["weekly: maintenance and lint"] --> REP["consolidation report"]
+    WM --> DR["weekly: promotion drafts"] --> INBOX["inbox draft notes"]
+    BK["periodic: memory backup"] --> SNAP["snapshot"]
+    EP["periodic: evolution proposer"] --> PROP["proposals about the brain itself"]
   end
-  subgraph Event-driven
-    CH[contradiction hook] --> FLAG[flag conflicting notes]
-    DW[draft watch] --> INBOX
+  subgraph ED["Event-driven"]
+    CH["contradiction hook"] --> FLAG["flag conflicting notes"]
+    DW["draft watch"] --> INBOX
   end
   subgraph Human
-    INBOX -->|"promote the inbox"| VERIFY[verify → merge → fix links → index → health → sync]
-    VERIFY --> WIKI[(canonical wiki)]
-    PROP -->|review| WIKI
+    INBOX -->|"promote the inbox"| VERIFY["verify, merge, fix links, index, health, sync"]
+    VERIFY --> WIKI["canonical wiki"]
+    PROP -->|"review"| WIKI
   end
-  classDef s fill:#0e1627,stroke:#334155,color:#e2e8f0; class HL,REP,SNAP,WIKI,INBOX s;
 ```
 
 | Hook | Trigger | Job | Human? |

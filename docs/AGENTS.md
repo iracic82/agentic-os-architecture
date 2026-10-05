@@ -11,16 +11,11 @@ the same way: through two MCP tools.
 
 ```mermaid
 flowchart TB
-  subgraph Assistants
-    A1[coding agent · project A]
-    A2[research agent · project B]
-    A3[chat session · project C]
-  end
-  T[["MCP: search_memory / add_memory"]]
-  A1 --> T; A2 --> T; A3 --> T
-  T --> MEM[(shared memory)]
-  T --> WIKI[(canonical wiki)]
-  classDef s fill:#0e1627,stroke:#334155,color:#e2e8f0; class MEM,WIKI s;
+  A1["coding agent, project A"] --> T["MCP: search_memory / add_memory"]
+  A2["research agent, project B"] --> T
+  A3["chat session, project C"] --> T
+  T --> MEM["shared memory"]
+  T --> WIKI["canonical wiki"]
 ```
 
 The contract each assistant follows is tiny and lives in its system instructions:
@@ -47,19 +42,19 @@ instead of becoming a junk drawer.
 
 ```mermaid
 flowchart LR
-  IN[new item] --> CL[classify<br/>fact? task? reference? noise?]
-  CL --> RO[route]
-  RO -->|short durable fact| MEM[(memory)]
-  RO -->|long-form| INBOX[wiki inbox/ draft]
-  RO -->|deliverable| OUT[output/]
-  RO -->|noise| X[drop]
-  MEM --> GR[(graph: link to related)]
+  IN["new item"] --> CL["classify: fact? reference? noise?"]
+  CL --> RO["route"]
+  RO -->|"short durable fact"| MEM["memory"]
+  RO -->|"long-form"| INBOX["wiki inbox draft"]
+  RO -->|"deliverable"| OUT["output/"]
+  RO -->|"noise"| X["drop"]
+  MEM --> GR["graph: link to related"]
   INBOX --> GR
-  CL -.local LLM.-> LLM[cheap model]
-  RO -.local LLM.-> LLM
+  CL -.->|"local LLM"| LLM["cheap model"]
+  RO -.->|"local LLM"| LLM
 ```
 
-Classification and routing run on a **local model** (private, cheap, fast). Only genuine synthesis —
+Classification and routing run on a **local model** (private, cheap, fast). Only genuine synthesis , 
 merging notes, writing a concept page, spends a frontier model. The **graph** records relationships
 so retrieval can follow connections, not just match text.
 
