@@ -34,7 +34,7 @@ and this ecosystem solves it with DNS-AID rather than a central registry or hard
 endpoint and capabilities are published as SVCB records (RFC 9460) in DNS and validated with DNSSEC and
 DANE. I wrote the reference implementation from scratch. DNS-AID is a Linux Foundation project (accepted
 27 May 2026, founding coalition Cloudflare, GoDaddy, Equinix, ISC, Infoblox) and an IETF dnsop draft,
-draft-mozleywilliams-dnsop-dnsaid. See https://github.com/iracic82/DNS-AID.
+draft-mozleywilliams-dnsop-dnsaid. See https://github.com/dns-aid/dns-aid-core.
 
 ### B. The ingestion agent that *curates* the brain ("Jarvis", internal)
 A small pipeline decides what each incoming item is and where it belongs, so the brain stays clean

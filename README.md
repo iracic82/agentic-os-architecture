@@ -95,7 +95,7 @@ I wrote the reference implementation from scratch. DNS-AID was accepted as a Lin
 on 27 May 2026, with Cloudflare, GoDaddy, Equinix, ISC and Infoblox in the founding coalition, and
 it's an IETF dnsop draft (`draft-mozleywilliams-dnsop-dnsaid`). The implementation carries the
 publisher, a DNSSEC/DANE validator, an SDK, an MCP server, and a directory service. Code and spec:
-https://github.com/iracic82/DNS-AID
+https://github.com/dns-aid/dns-aid-core
 
 ## Build your own
 
