@@ -81,7 +81,7 @@ extraction run on a local Qwen3-32B and cost nothing. Sonnet reconciles quality 
 
 Longer detail: [architecture](docs/ARCHITECTURE.md), [how the agents connect](docs/AGENTS.md),
 [the hooks](docs/HOOKS.md), [the cadence](docs/CADENCE.md), [why it's built this way and how it
-compares](docs/WHY.md), and the [design decisions and threat model](docs/DESIGN-DECISIONS.md).
+compares](docs/WHY.md), the [design decisions and threat model](docs/DESIGN-DECISIONS.md), and the [design philosophy](docs/HARNESS.md).
 Sanitised job skeletons are in [templates](templates/).
 
 ## Finding other agents: DNS-AID

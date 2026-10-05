@@ -37,6 +37,20 @@ LLM. Frontier tokens are spent only on real synthesis.
 | **Contradiction / incoherence** | A hook compares new assertions against existing notes and flags disagreement |
 | **Over-capture (junk drawer)** | The ingestion agent classifies and can *drop* noise; not everything becomes a memory |
 
+## The failure class the guardrails target
+
+Agentic harm lives in the action, not the text. A sequence of legal, well-formed tool calls can compose
+into harm that leaves no signature: no attack string to match, no DLP fingerprint (moving a page changes
+no content), no rule a policy engine was ever given. Faberlens ran ~35,800 behavioral probes across ten
+production MCP connectors and three models and named the pattern: there is no safe model. The safest on
+average still swept a mailbox for passwords when asked to "check for sensitive information", the smaller
+model beat the bigger one on most categories, and the safe choice changed per connector.
+
+This system is a composition of models and MCP connectors, so it assumes that failure class rather than
+hoping a model avoids it. The controls are behavioral, at the tool-call layer: the cloud agents can only
+draft a pull request, collectors are read-only, a human merge is the only path into the canonical layer,
+and the scope of anything an agent sends comes from my request, never from a page it fetched.
+
 ## What it deliberately does NOT do
 - It does not auto-promote. Ever. A human gates the canonical layer.
 - It does not store secrets, transient state, or anything git already records.

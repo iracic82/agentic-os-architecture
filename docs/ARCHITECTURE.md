@@ -1,67 +1,79 @@
 # Architecture
 
-Agentic OS is four layers and one rule. The rule: **markdown is the source of truth; everything else is a
-cache you can rebuild.**
+Four layers and one rule. The rule: markdown is the source of truth, and everything else is a cache I
+can rebuild.
 
-## Components
+## The four layers
 
-### 1. Durable memory (the "recall layer")
-A vector-memory service holds short, durable facts, decisions, conventions, gotchas, tagged by
-domain and project. It is exposed to every AI assistant through exactly two MCP tools:
+**Source of truth.** A git repo of markdown in `~/brain`, in three stages: `raw/` is staging (a dropped
+article, a transcript, a half-formed idea), `wiki/` is the compiled, curated knowledge (one note per
+topic), and `output/` holds deliverables the brain produced. This is canonical. Everything below is a
+projection of it.
 
-- `search_memory(query, [domain], [project])`, called at the **start** of non-trivial work.
-- `add_memory(fact, domain, project)`, called when something is worth knowing in a future session.
+**Recall spine.** Mem0 extracts short facts from what I tell it and stores the vectors in a Postgres
+pgvector database on a Timescale instance. Every project reaches it through one MCP server,
+`brain-memory`, with two tools. The store is disposable; it is re-indexed from the markdown.
 
-It is deliberately small and disposable. It is re-indexed from the knowledge base whenever needed.
+**Structure.** A graph compiler turns `~/brain` into a queryable knowledge graph, so the system can
+follow relationships between notes instead of only matching text.
 
-### 2. Knowledge base (the "canonical layer")
-A git repository of Markdown, viewed in Obsidian. Long-form knowledge lives here: `concepts/`,
-`projects/`, plus two working areas, `inbox/` (unapproved drafts) and `_consolidation/` (weekly
-reports). Because it is plain text in git, it is diff-able, reviewable, and permanent.
-
-### 3. Ingestion pipeline ("Jarvis")
-New information is processed by a small pipeline rather than dumped straight into memory:
+**Surface.** Obsidian opens `~/brain` as a vault to read and edit, a Streamlit dashboard shows live
+state and health, and a local model reads a spoken brief each morning.
 
 ```mermaid
 flowchart LR
-  I[new fact / note / artifact] --> C[classify]
-  C --> R[route: memory? wiki-inbox? output?]
-  R --> S[store]
-  S --> G[(knowledge graph)]
-  C -.cheap model.-> L[local LLM]
-  R -.cheap model.-> L
+  subgraph Canonical["source of truth · git"]
+    RAW[raw/ staging] --> WIKI[wiki/ curated] --> OUT[output/ deliverables]
+  end
+  WIKI -->|re-index| MEM[(Mem0 · pgvector on Timescale)]
+  WIKI -->|compile| GRAPH[(knowledge graph)]
+  WIKI -->|open| OBS[Obsidian vault]
+  MEM <-->|search_memory / add_memory| MCP[["brain-memory MCP"]]
+  classDef s fill:#eef2ff,stroke:#c7d2fe,color:#1e293b; class MEM,GRAPH,MCP s;
 ```
 
-Classification and routing use a **local LLM** (cheap, private); only hard synthesis spends a frontier
-model. The graph store captures relationships between notes so the system can reason over connections,
-not just retrieve single facts.
+## The scoping rule
 
-### 4. Surfaces
-- A **dashboard** (Streamlit) to browse state and health.
-- A **spoken daily brief**, the day's relevant knowledge, read aloud.
-- **Heartbeat / graph publishing** so the brain's state is observable.
+One constant user id across every project means one shared brain. Each memory is tagged with a domain
+(research or engineering) and a project, so I can trace where a fact came from. Recall defaults to broad,
+which is what makes a decision on one account surface on the next.
 
-## Data flow, end to end
+## Ingestion ("Jarvis")
+
+New material goes through a small pipeline instead of straight into memory, so the brain stays curated
+instead of turning into a junk drawer.
 
 ```mermaid
-sequenceDiagram
-  participant A as Assistant (any project)
-  participant M as Mem0 (recall)
-  participant J as Jarvis pipeline
-  participant W as Wiki (canonical)
-  A->>M: search_memory(...) before acting
-  M-->>A: prior decisions / gotchas
-  A->>M: add_memory(new durable fact)
-  A->>J: dump raw artifact
-  J->>J: classify → route → store → graph
-  J-->>W: draft into inbox/ (weekly)
-  Note over W: human reviews and promotes
-  W->>M: re-index (DB is a cache of this)
+flowchart LR
+  IN[new item] --> CL[classify: fact / reference / deliverable / noise]
+  CL --> RO[route]
+  RO -->|short durable fact| MEM[(memory)]
+  RO -->|long-form| INBOX[wiki/inbox draft]
+  RO -->|deliverable| OUT[output/]
+  RO -->|noise| X[drop]
+  CL -.local Qwen3.-> LLM[cheap model]
+  RO -.local Qwen3.-> LLM
 ```
+
+Classification and routing run on a local Qwen3. Only real synthesis, merging notes or writing a concept
+page, spends a frontier model.
+
+## Verification
+
+The wiki is treated as a build artifact, not a pile of files. A health check asserts invariants and
+fails if any break: no dangling `[[wikilinks]]`, no orphan notes, every `raw/` source represented in
+`wiki/`. This is the idea from Anthropic's "how we use Claude Code" writeup, applied to a knowledge base.
+
+## Reversible by design
+
+Because the markdown is canonical, the expensive parts are swappable with nothing lost. The embedder
+started as a local MiniLM at 384 dimensions and moved to OpenAI `text-embedding-3-large` at 3072; re-
+embedding was lossless, and the canary confirmed recall quality after the swap. The extraction model is
+switchable per machine (a hosted model by default, a local Qwen3-32B on the Puget box as a standby). If
+a vendor changes terms tomorrow, I re-index and carry on.
 
 ## The boundary that keeps it honest
 
-Several local caches exist (editor memory plugins, code-context tools, symbol indexers). They are
-convenient but **lossy and machine-specific**. The rule is simple: when a cache disagrees with the
-canonical markdown, **the markdown wins**, and the cache is rebuilt. This is what makes the whole
-system portable and trustworthy.
+Editor memory plugins, code-context tools and symbol indexers are all caches too. They are convenient and
+machine-specific. When one disagrees with the canonical markdown, the markdown wins and the cache is
+rebuilt. That rule is what makes the system portable rather than a pile of vendor state.
